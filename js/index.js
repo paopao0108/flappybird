@@ -62,15 +62,6 @@ function startGame(e) {
     detectPass();
   }, 10);
 
-  // setInterval(function () {
-  //   // 下落过程检测是否碰撞
-  //   if (isCrash()) {
-  //     clearInterval(downInterval);
-  //     lose();
-  //   }
-  //   detectPass();
-  // }, 2);
-
   // 6. 移动地面
   moveGround();
 }
