@@ -6,16 +6,30 @@
 }
 // 定义css 变量，方便js获取与设置
 :root {
-
+  --background-color: rgb(126, 245, 67);
+  --bar-color: #000;
+  --area-width: 600px;
+  --area-height: 400px;
+  --block-width: 50px;
+  --block-height: var(--area-height);
+  --block-number: 3;
+  --block-gap: 200px;
+  --bird-size: 35px;
+  --bar-gap: 150px;
+  --front-color: rgb(246, 138, 5);
 }
 // 定义 less 变量，方便 less 引用
-@background-color: rgb(126, 245, 67);
-@bar-color: #000;
-@area-width: 500px;
-@area-height: 500px;
-@block-width: 50px;
-@hole-height: 150px;
-@block-number: 3;
+@background-color: var(--background-color,rgb(126, 245, 67));
+@bar-color: var(--bar-color, #000);
+@front-color: var(--front-color, rgb(246, 138, 5));
+@area-width: var(--area-width, 600px);
+@area-height: var(--area-height, 400px);
+@block-width: var(--block-width, 50px);
+@block-height: var(--block-height, 50px);
+@block-number: var(--block-number, 3);
+@block-gap: var(--block-gap, 200px); // block之间的水平间隙
+@bird-size: var(--bird-size, 35px);
+@bar-gap: var(--bar-gap, 150px);
 
 .moveblock(@time:2s) {
   @keyframes moveblock {
@@ -23,86 +37,100 @@
       left: @area-width;
     }
     100% {
-      left: -@block-width;
+      left: calc(-1*@block-width);
     }
   }
-  animation: moveblock 3s @time linear infinite;
+  animation: moveblock 5s @time linear infinite;
 }
 
-// 
-// .loop(@i) when (@i < @block-number) {
-//   .loop((@i-1));
-//   &:nth-child(1)
-// }
-
-
-.game {
+.container {
   width: @area-width;
-  height: @area-height;
-  background-color: @background-color;
-  margin: 30px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 10px auto;
   overflow: hidden;
-  position: relative;
-  // background: url("../assets/img/bg.jpeg") no-repeat;
+  .game {
+    width: @area-width;
+    height: @area-height;
+    background-color: @background-color;
+    // margin: 30px auto;
+    overflow: hidden;
+    position: relative;
+  }
+  .ground {
+    width: calc(2*@area-width);
+    height: 112px;
+    background: @background-color url("../assets/img/land.png")  repeat-x bottom;
+    position: relative;
+    left: 0;
+  }
 }
 
 .blocks {
   width: 100%;
-  height: 100%;
+
   .block {
     width: @block-width;
-    height: @area-height;
-    position: absolute;
-    background-color: #000;
-    left: @area-height;
-    &.move {
+    /* 相对定位占有原来的位置 left是相对于原来的位置的left */
+    // 此处改为了绝对定位
+    position: absolute; 
+    left: @area-width;
 
-
-      &:nth-child(1) {
-        .moveblock(0s);
-      }
-      &:nth-child(2) {
-        .moveblock(1s);
-      }
-      &:nth-child(3) {
-        .moveblock(2s);
-      }
-    }
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    // 角色可穿过的空隙
+    gap: @bar-gap; 
     .bar {
       width: 100%;
-      height: 100%;
+      height: @area-height;
       background-color: @bar-color;
-      position: absolute;
-      top: 0;
+      position: relative;
+      /* top: -500px ~ -150px */
+      top: -200px; 
       left: 0;
-    }
-    .hole {
-      width: 100%;
-      height: @hole-height;
-      background-color: @background-color;
-      position: absolute;
-      left: 0;
-      top: 0;
+      color: #fff;
+      &.upbar img {
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        user-select: none;
+      }
+      &.downbar img {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        user-select: none;
+      }
     }
   }
 }
 
 .bird {
-  width: 20px;
-  height: 20px;
+  width: @bird-size;
+  height: @bird-size;
+  overflow: hidden;
   border-radius: 10px;
-  background-color: rgb(246, 138, 5);
+  background-color: @front-color;
   position: absolute;
-  left: 0;
-  top: 50%;
+  left: 100px;
+  top: 350px;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  img {
-    width: 100px;
-    height: auto;
-  }
+  // img {
+  //   width: 100px;
+  //   height: auto;
+  // }
 }
+
+
 
 .start {
   position: absolute;
@@ -111,7 +139,7 @@
   transform: translate(-50%, -50%);
   width: 100px;
   height: 50px;
-  background-color: rgb(245, 177, 60);
+  background-color: @front-color;
   border: 0;
   border-radius: 10px;
   color: darkgreen;
@@ -122,4 +150,58 @@
   &.hidden {
     display: none;
   }
+}
+
+.end {
+  visibility: hidden; // hidden后无法再触发事件 不能用opacity 会触发事件
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 10px;
+  background-color: #fff;
+  opacity: 0;
+  transition: .3s;
+  
+  .gameover {
+    color: red;
+    // background-color: #fff;
+    font-weight: 700;
+    font-size: 25px;
+    padding: 20px;
+  }
+  .again {
+    width: 150px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border: 0;
+    border-radius: 10px;
+    color: darkgreen;
+    font-weight: 700;
+    font-size: 20px;
+    cursor: pointer;
+    background-color: @front-color;
+  }
+  &.show {
+    visibility: visible;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+    transition: 1s;
+    // display: block;
+  }
+}
+
+.score {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  background-color: @front-color;
+  width: 100px;
+  border-radius: 10px;
+  padding: 5px 10px;
+  color: #fff;
 }
